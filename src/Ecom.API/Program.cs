@@ -1,4 +1,6 @@
 using Ecom.Infrastructure;
+using Microsoft.Extensions.FileProviders;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.InfrastructureConfiguration(builder.Configuration);
+
+//Configure Automapper
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+//Configure IFileProvider
+builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(
+    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -19,7 +29,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseStaticFiles();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -1,4 +1,5 @@
-﻿using Ecom.Core.Interfaces;
+﻿using Ecom.Core.Entities;
+using Ecom.Core.Interfaces;
 using Ecom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Ecom.Infrastructure.Repositories
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity<int>
     {
         private readonly ApplicationDbContext _context;
 
@@ -25,7 +26,7 @@ namespace Ecom.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(T id)
+        public async Task DeleteAsync(int id)
         {
             var entity =await _context.Set<T>().FindAsync(id);
             _context.Set<T>().Remove(entity);
@@ -51,20 +52,20 @@ namespace Ecom.Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<T> GetAsync(T id)
+        public async Task<T> GetAsync(int id)
          => await _context.Set<T>().FindAsync(id);
 
-        public async Task<T> GetByIdAsync(T id, params Expression<Func<T, object>>[] includes)
+        public async Task<T> GetByIdAsync(int id, params Expression<Func<T, object>>[] includes)
         {
-            IQueryable<T> query = _context.Set<T>();
+            IQueryable<T> query = _context.Set<T>().Where(x=>x.Id==id);
             foreach (var item in includes)
             {
                 query = query.Include(item);
             }
-            return await ((DbSet<T>)query).FindAsync(id);
+            return await query.FirstOrDefaultAsync();
         }
 
-        public async Task UpdateAsync(T id, T entity)
+        public async Task UpdateAsync(int id, T entity)
         {
             var exitingEntity = await _context.Set<T>().FindAsync(id);
             if(exitingEntity is not null)

@@ -18,9 +18,9 @@ namespace Ecom.Infrastructure.Data.Config
             builder.Property(x => x.Price).HasColumnType("decimal(18, 2)");
 
             builder.HasData(
-                new Product { Id = 1, Name = "Product_1", Description = "P1", Price = 2000, CategoryId = 1 },
-                new Product { Id = 2, Name = "Product_2", Description = "P1", Price = 2000, CategoryId = 2 },
-                new Product { Id = 3, Name = "Product_3", Description = "P1", Price = 2000, CategoryId = 1 }
+                new Product { Id = 1, Name = "Product_1", Description = "P1", Price = 2000, CategoryId = 1 ,ProductPicture="https://"},
+                new Product { Id = 2, Name = "Product_2", Description = "P1", Price = 2000, CategoryId = 2, ProductPicture = "https://" },
+                new Product { Id = 3, Name = "Product_3", Description = "P1", Price = 2000, CategoryId = 1, ProductPicture = "https://" }
                 );
         }
     }
