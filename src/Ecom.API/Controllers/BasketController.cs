@@ -1,4 +1,6 @@
-﻿using Ecom.Core.Entities;
+﻿using AutoMapper;
+using Ecom.Core.Dtos;
+using Ecom.Core.Entities;
 using Ecom.Core.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +12,12 @@ namespace Ecom.API.Controllers
     public class BasketController : ControllerBase
     {
         private readonly IUnitOfWork _uOW;
+        private readonly IMapper _mapper;
 
-        public BasketController(IUnitOfWork UOW)
+        public BasketController(IUnitOfWork UOW,IMapper mapper)
         {
             _uOW = UOW;
+            _mapper = mapper;
         }
 
         [HttpGet("get-basket-item/{Id}")]
@@ -24,9 +28,10 @@ namespace Ecom.API.Controllers
         }
 
         [HttpPost("update-basket")]
-        public async Task<IActionResult> UpdateBasket(CustomerBasket customerBasket)
+        public async Task<IActionResult> UpdateBasket(CustomerBasketDto customerBasket)
         {
-            var _basket = await _uOW.BasketRepository.UpdateBasketAsync(customerBasket);
+            var result = _mapper.Map<CustomerBasketDto,CustomerBasket>(customerBasket);
+            var _basket = await _uOW.BasketRepository.UpdateBasketAsync(result);
 
             return Ok(_basket);
         }
