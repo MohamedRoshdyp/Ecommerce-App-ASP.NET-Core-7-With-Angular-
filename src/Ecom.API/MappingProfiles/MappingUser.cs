@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Ecom.Core.Dtos;
 using Ecom.Core.Entities;
+using Ecom.Core.Entities.Orders;
 
 namespace Ecom.API.MappingProfiles
 {
@@ -9,6 +10,7 @@ namespace Ecom.API.MappingProfiles
         public MappingUser()
         {
             CreateMap<Address, AddressDto>().ReverseMap();
+
         }
     }
 }

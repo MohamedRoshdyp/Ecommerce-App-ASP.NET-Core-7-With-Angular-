@@ -2,6 +2,7 @@ using Ecom.API.Errors;
 using Ecom.API.Extensions;
 using Ecom.API.Middleware;
 using Ecom.Core.Interfaces;
+using Ecom.Core.Services;
 using Ecom.Infrastructure;
 using Ecom.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -45,6 +46,8 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(i =>
     return ConnectionMultiplexer.Connect(configure);
 });
 
+//configure order Services
+builder.Services.AddScoped<IOrderServices, OrderServices>();
 
 
 var app = builder.Build();

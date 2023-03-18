@@ -3,7 +3,7 @@ using Ecom.API.Errors;
 using Ecom.API.Extensions;
 using Ecom.Core.Dtos;
 using Ecom.Core.Entities;
-using Ecom.Core.Interfaces;
+using Ecom.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
