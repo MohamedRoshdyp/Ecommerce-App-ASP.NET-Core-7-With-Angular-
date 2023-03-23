@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
+using Stripe;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,7 +49,8 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(i =>
 
 //configure order Services
 builder.Services.AddScoped<IOrderServices, OrderServices>();
-
+//configure payment getway
+builder.Services.AddScoped<IPaymentServices, PaymentServices>();
 
 var app = builder.Build();
 

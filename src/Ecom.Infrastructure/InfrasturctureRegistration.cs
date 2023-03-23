@@ -28,6 +28,7 @@ namespace Ecom.Infrastructure
             //configure Token Services
             services.AddScoped<ITokenServices, TokenServices>();
 
+
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             //services.AddScoped<ICategoryRepository, CategoryRepository>();
             //services.AddTransient<IProductRepository, ProductRepository>();

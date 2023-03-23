@@ -16,11 +16,13 @@ namespace Ecom.Infrastructure.Repositories
     {
         private readonly IUnitOfWork _uOW;
         private readonly ApplicationDbContext _context;
+        private readonly IPaymentServices _paymentServices;
 
-        public OrderServices(IUnitOfWork UOW, ApplicationDbContext context)
+        public OrderServices(IUnitOfWork UOW, ApplicationDbContext context,IPaymentServices paymentServices)
         {
             _uOW = UOW;
             _context = context;
+            _paymentServices = paymentServices;
         }
         public async Task<Order> CreateOrderAsync(string buyerEmail, int deliveryMethodId, string basketId, ShipAddress shipAddress)
         {
@@ -30,26 +32,26 @@ namespace Ecom.Infrastructure.Repositories
 
             //fill item
 
-            //foreach (var item in basket.BasketItems)
-            //{
-            //    var productItem = await _uOW.ProductRepository.GetByIdAsync(item.Id);
-            //    var productItemOrderd = new ProductItemOrderd(productItem.Id, productItem.Name, productItem.ProductPicture);
-            //    var orderItem = new OrderItem(productItemOrderd, item.Price, item.Quantity);
-
-            //    items.Add(orderItem);
-            //}
-           
-            Parallel.ForEach(basket.BasketItems, item =>
+            foreach (var item in basket.BasketItems)
             {
-                var productItem =  _uOW.ProductRepository.GetByIdAsync(item.Id).GetAwaiter().GetResult();
+                var productItem = await _uOW.ProductRepository.GetByIdAsync(item.Id);
                 var productItemOrderd = new ProductItemOrderd(productItem.Id, productItem.Name, productItem.ProductPicture);
                 var orderItem = new OrderItem(productItemOrderd, item.Price, item.Quantity);
-                lock (items)
-                {
-                    items.Add(orderItem);
 
-                }
-            });
+                items.Add(orderItem);
+            }
+
+            //Parallel.ForEach(basket.BasketItems, item =>
+            //{
+            //    var productItem =  _uOW.ProductRepository.GetByIdAsync(item.Id).GetAwaiter().GetResult();
+            //    var productItemOrderd = new ProductItemOrderd(productItem.Id, productItem.Name, productItem.ProductPicture);
+            //    var orderItem = new OrderItem(productItemOrderd, item.Price, item.Quantity);
+            //    lock (items)
+            //    {
+            //        items.Add(orderItem);
+
+            //    }
+            //});
             await _context.OrderItems.AddRangeAsync(items);
             await _context.SaveChangesAsync();
 
@@ -61,8 +63,17 @@ namespace Ecom.Infrastructure.Repositories
 
             var subTotal = items.Sum(x => x.Price * x.Quantity);
 
+            //ceck if order exisit
+            var exitingOrder = await _context.Orders.Where(x => x.PaymentIntentId == basket.PaymentIntentId).FirstOrDefaultAsync();
+
+            if(exitingOrder is not null)
+            {
+                 _context.Orders.Remove(exitingOrder);
+                await _paymentServices.CreateOrUpdatePayment(basket.PaymentIntentId);
+            }
+
             //initilaize on Ctor
-            var order = new Order(buyerEmail, shipAddress, deliveryMethod, items, subTotal);
+            var order = new Order(buyerEmail, shipAddress, deliveryMethod, items, subTotal,basket.PaymentIntentId);
 
             //check order is not null
             if (order is null) return null;
@@ -72,7 +83,8 @@ namespace Ecom.Infrastructure.Repositories
             await _context.SaveChangesAsync();
 
             //remove Basket
-            await _uOW.BasketRepository.DeleteBasketAsync(basketId);
+            //await _uOW.BasketRepository.DeleteBasketAsync(basketId);
+
             return order;
         }
 
